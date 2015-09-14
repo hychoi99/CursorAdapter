@@ -112,7 +112,7 @@ public class OrderDetail extends AppCompatActivity implements OnMapReadyCallback
         @Override
         protected LatLng doInBackground(String... params) {
             Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
-            //vs getApplication vs this
+            //vs getApplication vs this vs getActivity vs getBaseContext
             List<Address> address;
             LatLng p1 = null;
 

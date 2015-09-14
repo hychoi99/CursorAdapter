@@ -1,17 +1,21 @@
 package com.choimeetsworld.cursoradapter;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.LoaderManager.LoaderCallbacks;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -21,12 +25,9 @@ import com.choimeetsworld.cursoradapter.Database.DbHelper;
 
 public class MainActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-
-    private LoaderCallbacks<Cursor> mCallbacks;
     private SimpleCursorAdapter mCursorAdapter;
     //private CustomCursorAdapter mCustomCursorAdapter;
     private ListView ordersList;
-    private Button addButton;
     private EditText customerInput;
     private EditText orderInput;
     private DataAccessObject dao;
@@ -37,11 +38,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         setContentView(R.layout.activity_main);
 
         ordersList = (ListView) findViewById(R.id.listView_orders);
-        addButton = (Button) findViewById(R.id.button_add);
-        customerInput = (EditText) findViewById(R.id.editText_customer);
-        orderInput = (EditText) findViewById(R.id.editText_order);
         dao = new DataAccessObject(this);
-
         dao.openDb(); //only one instance of dataAccessor created
 
         /*
@@ -55,8 +52,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
                 new int[]{R.id.textViewRow_customer, R.id.textViewRow_order}, 0);
         ordersList.setAdapter(mCursorAdapter);
 
-
-        //getLoaderManager().initLoader(0, null, this).forceLoad();
+        getLoaderManager().initLoader(0, null, this).forceLoad();
 
         /*addButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,16 +62,19 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
             }
         });*/
 
-        //Start new activity showing order details, pass all important info
+        //Start new activity showing order details in list, pass all important info
         ordersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Cursor cursor = (Cursor) mCursorAdapter.getItem(position);
                 Intent intentOrderDetail = new Intent(MainActivity.this, OrderDetail.class);
                 Bundle bundle_order = new Bundle();
-                bundle_order.putString(DbHelper.COL_CUSTOMER, cursor.getString(cursor.getColumnIndex(DbHelper.COL_CUSTOMER)));
-                bundle_order.putString(DbHelper.COL_ORDER, cursor.getString(cursor.getColumnIndex(DbHelper.COL_ORDER)));
-                bundle_order.putString(DbHelper.COL_ID, cursor.getString(cursor.getColumnIndex(DbHelper.COL_ID)));
+                bundle_order.putString(DbHelper.COL_CUSTOMER,
+                        cursor.getString(cursor.getColumnIndex(DbHelper.COL_CUSTOMER)));
+                bundle_order.putString(DbHelper.COL_ORDER,
+                        cursor.getString(cursor.getColumnIndex(DbHelper.COL_ORDER)));
+                bundle_order.putString(DbHelper.COL_ID,
+                        cursor.getString(cursor.getColumnIndex(DbHelper.COL_ID)));
 
                 intentOrderDetail.putExtras(bundle_order);
                 startActivity(intentOrderDetail);
@@ -110,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         Log.i("in", "clicked");
         switch (view.getId()) {
             case R.id.button_add:
-                dao.createRow(customerInput.getText().toString(), orderInput.getText().toString());
+                new AddNewOrderDialog().show(getFragmentManager().beginTransaction(), "new order");
                 onQueryTextChanged();
                 break;
             case R.id.button_clear:
@@ -126,6 +125,42 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         onQueryTextChanged();
     }
 
+
+    public class AddNewOrderDialog extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+            LayoutInflater inflater = MainActivity.this.getLayoutInflater();
+            View dialogView = inflater.inflate(R.layout.dialog_addorder, null);
+            dialogBuilder.setView(dialogView);
+
+            customerInput = (EditText) dialogView.findViewById(R.id.name_input);
+            orderInput = (EditText) dialogView.findViewById(R.id.order_input);
+
+            dialogBuilder.setTitle("Add New Order");
+            dialogBuilder
+            .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int id) {
+                    dao.createRow(customerInput.getText().toString(), orderInput.getText().toString());
+                    onQueryTextChanged();
+                }
+            })
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    AddNewOrderDialog.this.getDialog().cancel();
+                }
+            });
+
+            return dialogBuilder.create();
+        }
+    }
+
+
+    // ** Loaders ** //
+
     //restarts loader when data has changed
     public boolean onQueryTextChanged() {
         // Called when the action bar search text has changed.  Update
@@ -134,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         getLoaderManager().restartLoader(0, null, this).forceLoad();
         return true;
     }
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new DataLoader(this, dao);
