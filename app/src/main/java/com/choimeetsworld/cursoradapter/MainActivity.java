@@ -22,15 +22,17 @@ import android.widget.SimpleCursorAdapter;
 
 import com.choimeetsworld.cursoradapter.Database.DataAccessObject;
 import com.choimeetsworld.cursoradapter.Database.DbHelper;
+import com.daimajia.swipe.SwipeLayout;
 
 public class MainActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    private SimpleCursorAdapter mCursorAdapter;
+    private SimpleCursorAdapter mCustomCursorAdapter;
     //private CustomCursorAdapter mCustomCursorAdapter;
     private ListView ordersList;
     private EditText customerInput;
     private EditText orderInput;
     private DataAccessObject dao;
+    private SwipeLayout mSwipeLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,26 +49,56 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         ordersList.setAdapter(mCustomCursorAdapter);
         */
 
-        mCursorAdapter = new SimpleCursorAdapter(this, R.layout.orders_row, null,
+        mCustomCursorAdapter = new SimpleCursorAdapter(this, R.layout.orders_row, null,
                 new String[]{DbHelper.COL_CUSTOMER, DbHelper.COL_ORDER},
                 new int[]{R.id.textViewRow_customer, R.id.textViewRow_order}, 0);
-        ordersList.setAdapter(mCursorAdapter);
+        ordersList.setAdapter(mCustomCursorAdapter);
+
+
+        /*
+        LayoutInflater inflater = getLayoutInflater();
+        View swipeView = inflater.inflate(R.layout.orders_row_test, null);
+        mSwipeLayout = (SwipeLayout) swipeView.findViewById(R.id.swipe);
+        mCustomCursorAdapter =
+                new CustomCursorAdapter(this, R.layout.orders_row_test, null,
+                new String[]{DbHelper.COL_CUSTOMER, DbHelper.COL_ORDER},
+                new int[]{R.id.trash, R.id.position}, 0);
+        ordersList.setAdapter(mCustomCursorAdapter);
+        */
+
+        // Create a ListView-specific touch listener. ListViews are given special treatment because
+        // by default they handle touches for their list items... i.e. they're in charge of drawing
+        // the pressed state (the list selector), handling list item clicks, etc.
+        SwipeDismissListViewTouchListener touchListener =
+                new SwipeDismissListViewTouchListener(
+                        ordersList,
+                        new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                            @Override
+                            public boolean canDismiss(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                                for (int position : reverseSortedPositions) {
+                                    Cursor dismissedItem = (Cursor) mCustomCursorAdapter.getItem(position);
+                                    dao.deleteRow(dismissedItem.getString(dismissedItem.getColumnIndex(DbHelper.COL_ID)));
+                                }
+                                onQueryTextChanged();
+                            }
+                        });
+        ordersList.setOnTouchListener(touchListener);
+        // Setting this scroll listener is required to ensure that during ListView scrolling,
+        // we don't look for swipes.
+        ordersList.setOnScrollListener(touchListener.makeScrollListener());
 
         getLoaderManager().initLoader(0, null, this).forceLoad();
-
-        /*addButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dao.createRow(customerInput.getText().toString(), orderInput.getText().toString());
-                onQueryTextChanged();
-            }
-        });*/
 
         //Start new activity showing order details in list, pass all important info
         ordersList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Cursor cursor = (Cursor) mCursorAdapter.getItem(position);
+                Cursor cursor = (Cursor) mCustomCursorAdapter.getItem(position);
                 Intent intentOrderDetail = new Intent(MainActivity.this, OrderDetail.class);
                 Bundle bundle_order = new Bundle();
                 bundle_order.putString(DbHelper.COL_CUSTOMER,
@@ -75,7 +107,6 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
                         cursor.getString(cursor.getColumnIndex(DbHelper.COL_ORDER)));
                 bundle_order.putString(DbHelper.COL_ID,
                         cursor.getString(cursor.getColumnIndex(DbHelper.COL_ID)));
-
                 intentOrderDetail.putExtras(bundle_order);
                 startActivity(intentOrderDetail);
             }
@@ -125,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         onQueryTextChanged();
     }
 
+    // ** Dialog Start ** //
 
     public class AddNewOrderDialog extends DialogFragment {
 
@@ -158,8 +190,9 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         }
     }
 
+    // ** Dialog End ** //
 
-    // ** Loaders ** //
+    // ** Loaders Start ** //
 
     //restarts loader when data has changed
     public boolean onQueryTextChanged() {
@@ -176,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
 
     @Override
     public void onLoadFinished(Loader<Cursor> arg0, Cursor data) {
-        mCursorAdapter.swapCursor(data);
+        mCustomCursorAdapter.swapCursor(data);
     }
 
     @Override
@@ -184,4 +217,6 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         // TODO Auto-generated method stub
 
     }
+
+    // ** Loaders End ** //
 }
