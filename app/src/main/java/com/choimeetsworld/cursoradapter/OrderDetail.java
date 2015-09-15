@@ -102,8 +102,10 @@ public class OrderDetail extends AppCompatActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
-        mUiSettings = mMap.getUiSettings();
         mMap.setMyLocationEnabled(true);
+        mUiSettings = mMap.getUiSettings();
+        mUiSettings.setZoomControlsEnabled(true);
+        mUiSettings.setZoomGesturesEnabled(true);
         new MapLoadTask().execute(destString);
     }
 

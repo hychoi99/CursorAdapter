@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         Log.i("in", "clicked");
         switch (view.getId()) {
             case R.id.button_add:
-                new AddNewOrderDialog().show(getFragmentManager().beginTransaction(), "new order");
+                new AddNewOrderDialog().show(getFragmentManager(), "new order");
                 onQueryTextChanged();
                 break;
             case R.id.button_clear:
