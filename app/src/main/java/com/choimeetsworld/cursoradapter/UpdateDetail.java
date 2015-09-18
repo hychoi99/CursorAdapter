@@ -15,6 +15,10 @@ public class UpdateDetail extends AppCompatActivity {
 
     private EditText updateCustomer;
     private EditText updateOrder;
+    private EditText updateAddress;
+    private EditText updateNumber;
+    private EditText updatePrice;
+    private EditText updateTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,14 +30,24 @@ public class UpdateDetail extends AppCompatActivity {
 
         updateCustomer = (EditText) findViewById(R.id.editText_customer_update);
         updateOrder = (EditText) findViewById(R.id.editText_order_update);
+        updateAddress = (EditText) findViewById(R.id.editText_address_update);
+        updateNumber = (EditText) findViewById(R.id.editText_number_update);
+        updatePrice = (EditText) findViewById(R.id.editText_price_update);
+        updateTime = (EditText) findViewById(R.id.editText_time_update);
 
         String customerText = bundle.getString(DbHelper.COL_CUSTOMER);
         String orderText = bundle.getString(DbHelper.COL_ORDER);
+        String addressText = bundle.getString(DbHelper.COL_ADDRESS);
+        String numberText = bundle.getString(DbHelper.COL_NUMBER);
+        String priceText = bundle.getString(DbHelper.COL_PRICE);
+        String timeText = bundle.getString(DbHelper.COL_TIME);
 
         updateCustomer.setText(customerText);
         updateOrder.setText(orderText);
-
-
+        updateAddress.setText(addressText);
+        updateNumber.setText(numberText);
+        updatePrice.setText(priceText);
+        updateTime.setText(timeText);
     }
 
     public void onClick(View v) {
@@ -42,6 +56,10 @@ public class UpdateDetail extends AppCompatActivity {
                 Intent updatedIntent = new Intent();
                 updatedIntent.putExtra(DbHelper.COL_CUSTOMER, updateCustomer.getText().toString());
                 updatedIntent.putExtra(DbHelper.COL_ORDER, updateOrder.getText().toString());
+                updatedIntent.putExtra(DbHelper.COL_ADDRESS, updateAddress.getText().toString());
+                updatedIntent.putExtra(DbHelper.COL_NUMBER, updateNumber.getText().toString());
+                updatedIntent.putExtra(DbHelper.COL_PRICE, updatePrice.getText().toString());
+                updatedIntent.putExtra(DbHelper.COL_TIME, updateTime.getText().toString());
                 setResult(RESULT_OK, updatedIntent);
                 finish();
         }

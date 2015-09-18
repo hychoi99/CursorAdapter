@@ -7,6 +7,10 @@ public class DataEntry {
 
     String customerName;
     String orderName;
+    String address;
+    String phoneNum;
+    String price;
+    String time;
     int uniqueID;
 
     public DataEntry() {}
@@ -22,20 +26,52 @@ public class DataEntry {
         return customerName;
     }
 
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
-
     public String getOrderName() {
         return orderName;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public String getPhoneNum() {
+        return phoneNum;
+    }
+
+    public String getPrice() {
+        return price;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public int getUniqueID() {
+        return uniqueID;
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
     }
 
     public void setOrderName(String orderName) {
         this.orderName = orderName;
     }
 
-    public int getUniqueID() {
-        return uniqueID;
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setPhoneNum(String phoneNum) {
+        this.phoneNum = phoneNum;
+    }
+
+    public void setPrice(String price) {
+        this.price = price;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
     }
 
     public void setUniqueID(int uniqueID) {

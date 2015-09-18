@@ -28,10 +28,15 @@ public class DataAccessObject {
         db.close();
     }
 
-    public void createRow(String customer, String order) {
+    public void createRow(String customer, String order,
+                          String address, String phone, String price, String time) {
         ContentValues values = new ContentValues();
         values.put(dbHelper.COL_CUSTOMER, customer);
         values.put(dbHelper.COL_ORDER, order);
+        values.put(dbHelper.COL_ADDRESS, address);
+        values.put(dbHelper.COL_NUMBER, phone);
+        values.put(dbHelper.COL_PRICE, price);
+        values.put(dbHelper.COL_TIME, time);
 
         db.insert(dbHelper.TABLE_NAME, null, values);
         Log.i(TAG, "Inserted row with customer name = " + customer);
@@ -44,10 +49,15 @@ public class DataAccessObject {
         Log.i(TAG, "Deleted row with row id = " + id);
     }
 
-    public void updateRow(String id, String customer, String order) {
+    public void updateRow(String id, String customer, String order,
+                          String address, String phone, String price, String time) {
         ContentValues values = new ContentValues();
         values.put(dbHelper.COL_CUSTOMER, customer);
         values.put(dbHelper.COL_ORDER, order);
+        values.put(dbHelper.COL_ADDRESS, address);
+        values.put(dbHelper.COL_NUMBER, phone);
+        values.put(dbHelper.COL_PRICE, price);
+        values.put(dbHelper.COL_TIME, time);
 
         db.update(dbHelper.TABLE_NAME, values, dbHelper.COL_ID + " = " + id, null);
         Log.i(TAG, "Updated row with row id = " + id);
@@ -66,5 +76,6 @@ public class DataAccessObject {
     public void clearDb() {
         db.execSQL("delete from "+ dbHelper.TABLE_NAME);
         Log.i(TAG, "Cleared table");
+        dbHelper.onUpgrade(db, 1, 1);
     }
 }

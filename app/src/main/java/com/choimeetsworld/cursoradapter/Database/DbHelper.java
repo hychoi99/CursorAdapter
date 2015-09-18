@@ -7,6 +7,7 @@ import android.util.Log;
 
 /**
  * Created by hychoi on 9/6/2015.
+ * Object for creating and keeping the database object
  */
 
 public class DbHelper extends SQLiteOpenHelper {
@@ -19,9 +20,18 @@ public class DbHelper extends SQLiteOpenHelper {
     public static final String COL_ID = "_id";
     public static final String COL_ORDER = "order_name";
     public static final String COL_CUSTOMER = "customer_name";
+    public static final String COL_ADDRESS = "customer_address";
+    public static final String COL_NUMBER = "customer_number";
+    public static final String COL_PRICE = "order_price";
+    public static final String COL_TIME = "order_time";
+
     private static final String CREATE_TABLE = "create table " + TABLE_NAME + "(" +
             "_id integer primary key autoincrement, " +
             COL_ORDER + " text not null, " +
+            COL_ADDRESS + " text not null, " +
+            COL_NUMBER + " text not null, " +
+            COL_PRICE + " text not null, " +
+            COL_TIME + " text not null, " +
             COL_CUSTOMER + " text not null); ";
 
     public static synchronized DbHelper getInstance(Context context) {

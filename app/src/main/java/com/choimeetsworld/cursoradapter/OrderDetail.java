@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.choimeetsworld.cursoradapter.Database.DataAccessObject;
@@ -30,6 +31,10 @@ public class OrderDetail extends AppCompatActivity implements OnMapReadyCallback
 
     private TextView textViewCustomer;
     private TextView textViewOrder;
+    private TextView textViewAddress;
+    private TextView textViewNumber;
+    private TextView textViewPrice;
+    private TextView textViewTime;
     private Button buttonDelete;
     private Button buttonUpdate;
     private String order_id;
@@ -50,6 +55,10 @@ public class OrderDetail extends AppCompatActivity implements OnMapReadyCallback
 
         textViewCustomer = (TextView) findViewById(R.id.textView_customer);
         textViewOrder = (TextView) findViewById(R.id.textView_order);
+        textViewAddress = (TextView) findViewById(R.id.textView_address);
+        textViewNumber = (TextView) findViewById(R.id.textView_number);
+        textViewPrice = (TextView) findViewById(R.id.textView_price);
+        textViewTime = (TextView) findViewById(R.id.textView_time);
         buttonDelete = (Button) findViewById(R.id.button_delete);
         buttonUpdate = (Button) findViewById(R.id.button_update);
 
@@ -58,12 +67,27 @@ public class OrderDetail extends AppCompatActivity implements OnMapReadyCallback
 
         textViewCustomer.setText(bundle.getString(DbHelper.COL_CUSTOMER));
         textViewOrder.setText(bundle.getString(DbHelper.COL_ORDER));
-        order_id = bundle.getString(DbHelper.COL_ID);
-        destString = bundle.getString(DbHelper.COL_ORDER);
+        textViewAddress.setText(bundle.getString(DbHelper.COL_ADDRESS));
+        textViewNumber.setText(bundle.getString(DbHelper.COL_NUMBER));
+        textViewPrice.setText(bundle.getString(DbHelper.COL_PRICE));
+        textViewTime.setText(bundle.getString(DbHelper.COL_TIME));
 
-        MapFragment mapFragment = (MapFragment) getFragmentManager()
+        order_id = bundle.getString(DbHelper.COL_ID);
+        destString = bundle.getString(DbHelper.COL_ADDRESS);
+
+        final ScrollView v = (ScrollView) findViewById(R.id.scrollView1);
+
+        WorkaroundMapFragment mapFragment = (WorkaroundMapFragment) getFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        ((WorkaroundMapFragment) getFragmentManager().findFragmentById(R.id.map))
+                .setListener(new WorkaroundMapFragment.OnTouchListener() {
+                    @Override
+                    public void onTouch() {
+                        v.requestDisallowInterceptTouchEvent(true);
+                    }
+                });
 
         //delete row with the known order id, using the dataAccessor
         buttonDelete.setOnClickListener(new View.OnClickListener() {
@@ -91,9 +115,19 @@ public class OrderDetail extends AppCompatActivity implements OnMapReadyCallback
             if (resultCode == RESULT_OK) {
                 String updatedCustomerText = data.getStringExtra(DbHelper.COL_CUSTOMER);
                 String updatedOrderText = data.getStringExtra(DbHelper.COL_ORDER);
+                String updatedAddressText = data.getStringExtra(DbHelper.COL_ADDRESS);
+                String updatedNumberText = data.getStringExtra(DbHelper.COL_NUMBER);
+                String updatedPriceText = data.getStringExtra(DbHelper.COL_PRICE);
+                String updatedTimeText = data.getStringExtra(DbHelper.COL_TIME);
                 textViewCustomer.setText(updatedCustomerText);
                 textViewOrder.setText(updatedOrderText);
-                dao.updateRow(order_id, updatedCustomerText, updatedOrderText);
+                textViewAddress.setText(updatedAddressText);
+                textViewNumber.setText(updatedNumberText);
+                textViewPrice.setText(updatedPriceText);
+                textViewTime.setText(updatedTimeText);
+
+                dao.updateRow(order_id, updatedCustomerText, updatedOrderText, updatedAddressText,
+                        updatedNumberText, updatedPriceText, updatedTimeText);
             }
         }
     }

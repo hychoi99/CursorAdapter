@@ -10,6 +10,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -19,20 +20,23 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.choimeetsworld.cursoradapter.Database.DataAccessObject;
 import com.choimeetsworld.cursoradapter.Database.DbHelper;
 import com.daimajia.swipe.SwipeLayout;
+
+import info.hoang8f.widget.FButton;
 
 public class MainActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
     private SimpleCursorAdapter mCustomCursorAdapter;
     //private CustomCursorAdapter mCustomCursorAdapter;
     private ListView ordersList;
-    private EditText customerInput;
-    private EditText orderInput;
     private DataAccessObject dao;
     private SwipeLayout mSwipeLayout;
+    private FButton customAddButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +44,12 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         setContentView(R.layout.activity_main);
 
         ordersList = (ListView) findViewById(R.id.listView_orders);
+        //customAddButton = (FButton) findViewById(R.id.add_customButton);
         dao = new DataAccessObject(this);
         dao.openDb(); //only one instance of dataAccessor created
+
+        //customAddButton.setButtonColor(getResources().getColor(R.color.fbutton_color_emerald));
+        //customAddButton.setShadowEnabled(true);
 
         /*
         mCustomCursorAdapter = new CustomCursorAdapter(this);
@@ -50,10 +58,9 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
         */
 
         mCustomCursorAdapter = new SimpleCursorAdapter(this, R.layout.orders_row, null,
-                new String[]{DbHelper.COL_CUSTOMER, DbHelper.COL_ORDER},
+                new String[]{DbHelper.COL_CUSTOMER, DbHelper.COL_ADDRESS},
                 new int[]{R.id.textViewRow_customer, R.id.textViewRow_order}, 0);
         ordersList.setAdapter(mCustomCursorAdapter);
-
 
         /*
         LayoutInflater inflater = getLayoutInflater();
@@ -105,6 +112,14 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
                         cursor.getString(cursor.getColumnIndex(DbHelper.COL_CUSTOMER)));
                 bundle_order.putString(DbHelper.COL_ORDER,
                         cursor.getString(cursor.getColumnIndex(DbHelper.COL_ORDER)));
+                bundle_order.putString(DbHelper.COL_ADDRESS,
+                        cursor.getString(cursor.getColumnIndex(DbHelper.COL_ADDRESS)));
+                bundle_order.putString(DbHelper.COL_NUMBER,
+                        cursor.getString(cursor.getColumnIndex(DbHelper.COL_NUMBER)));
+                bundle_order.putString(DbHelper.COL_PRICE,
+                        cursor.getString(cursor.getColumnIndex(DbHelper.COL_PRICE)));
+                bundle_order.putString(DbHelper.COL_TIME,
+                        cursor.getString(cursor.getColumnIndex(DbHelper.COL_TIME)));
                 bundle_order.putString(DbHelper.COL_ID,
                         cursor.getString(cursor.getColumnIndex(DbHelper.COL_ID)));
                 intentOrderDetail.putExtras(bundle_order);
@@ -168,16 +183,31 @@ public class MainActivity extends AppCompatActivity implements LoaderCallbacks<C
             View dialogView = inflater.inflate(R.layout.dialog_addorder, null);
             dialogBuilder.setView(dialogView);
 
-            customerInput = (EditText) dialogView.findViewById(R.id.name_input);
-            orderInput = (EditText) dialogView.findViewById(R.id.order_input);
+            final EditText nameInput = (EditText) dialogView.findViewById(R.id.name_input);
+            final EditText orderInput = (EditText) dialogView.findViewById(R.id.order_input);
+            final EditText phoneInput = (EditText) dialogView.findViewById(R.id.phone_input);
+            final EditText addressInput = (EditText) dialogView.findViewById(R.id.address_input);
+            final EditText priceInput = (EditText) dialogView.findViewById(R.id.price_input);
+            final EditText timeInput = (EditText) dialogView.findViewById(R.id.time_input);
 
             dialogBuilder.setTitle("Add New Order");
             dialogBuilder
             .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int id) {
-                    dao.createRow(customerInput.getText().toString(), orderInput.getText().toString());
-                    onQueryTextChanged();
+
+                    if(TextUtils.isEmpty(addressInput.getText().toString().trim())) {
+                        Toast.makeText(getApplicationContext(), "Invalid Address",
+                                Toast.LENGTH_LONG).show();
+                    }
+                    else
+                    {
+                        dao.createRow(nameInput.getText().toString(), orderInput.getText().toString(),
+                                addressInput.getText().toString(), phoneInput.getText().toString(),
+                                priceInput.getText().toString(), timeInput.getText().toString());
+                        onQueryTextChanged();
+                    }
+
                 }
             })
             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
